@@ -1,0 +1,115 @@
+- name: Removing current app directory
+  file:
+    path=/app/{{ app_name }}
+    state=absent
+  become: yes
+
+- name: create app directory if it does not exist
+  file: 
+    path={{ item }}
+    state=directory
+  with_items:
+    - /app/{{ app_name }}
+    - /app/{{ app_name }}/bin
+    - /app/{{ app_name }}/lib
+    - /app/{{ app_name }}/config
+
+- name: copy  template  startup file to /app/{{ app_name }}/bin
+  template: src=startup.j2
+            dest=/app/{{ app_name }}/bin/startup.sh
+            mode=755 owner=ubuntu
+  become: yes
+
+- name: copy  template service script file to /etc/systemd/system/{{ app_name }}.service
+  template: src=servicescript.j2
+            dest=/etc/systemd/system/{{ app_name }}.service
+            mode=644
+  become: yes
+  
+- name: Deploy Artifacts to the server
+  copy: src={{ item }}
+        dest=/app/{{ app_name }}/lib
+        mode=644 owner=ubuntu
+  with_fileglob: "{{ WORKSPACE }}/target/{{ app_name }}*.jar"
+  # when: app_name == "inventorymanagement"
+  become: yes
+
+
+- name: Deploy config file to the server
+  copy: src=application-prod.yml
+        dest=/app/{{ app_name }}/config
+        mode=644 owner=ubuntu
+  become: yes
+
+- name: Deploy nerelic files to the server
+  copy: src={{ WORKSPACE }}/devops/ansible/newrelic-java-5.6.0.zip
+        dest=/app/{{ app_name }}/lib
+        mode=644 owner=ubuntu
+  become: yes
+
+- name: Unarchive a nerelic zip file
+  unarchive:
+    src: /app/{{ app_name }}/lib/newrelic-java-5.6.0.zip
+    dest: /app/{{ app_name }}/lib
+    remote_src: yes
+
+- name: copy  newrelic conf file to app root directory
+  template: src=newrelic.yml.j2 dest=/app/{{ app_name }}/lib/newrelic/newrelic.yml
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_inventorymanagement.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "inventorymanagement"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_dvarapalaka.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "dvarapalaka"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_vyaktitva.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "vyaktitva"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_madhyama.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "madhyama"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_notification.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "notification"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_taxonomy.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "taxonomy"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_notification-service.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "notification-service"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_khoj.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "khoj"
+  become: yes
+
+- name: copy  template  conf file to /etc/nginx/sites-available
+  template: src=nginx_vhost_loyalty-service.j2 dest=/etc/nginx/sites-available/{{ app_name }}.conf
+  when: app_name == "loyalty-service"
+  become: yes
+
+
+- name: Links site to default
+  file: dest=/etc/nginx/sites-enabled/{{ app_name }}.conf src=/etc/nginx/sites-available/{{ app_name }}.conf state=link
+  become: yes
+
+- name: Ensure {{ app_name }} service is restarted
+  service: name={{ app_name }} state=restarted enabled=yes
+  become: yes
+
+- name: Ensure Nginx service is restarted
+  service: name=nginx state=restarted enabled=yes
+  become: yes

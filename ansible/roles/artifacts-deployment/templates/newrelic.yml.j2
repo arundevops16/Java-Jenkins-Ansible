@@ -1,0 +1,57 @@
+# This file configures the New Relic Agent.  New Relic monitors
+# This section is for settings common to all environments.
+common: &default_settings
+
+  # ============================== LICENSE KEY ===============================
+  license_key: '3nfekn34lnfnfdsnnf'
+
+  # Agent Enabled
+  # Use this setting to disable the agent instead of removing it from the startup command.
+  # Default is true.
+  agent_enabled: true
+
+  # The first application name must be unique.
+  app_name: {{ app_name }}-{{ env }}
+
+  # Default is false.
+  enable_auto_app_naming: false
+
+  # The name of the log file.
+  # Default is newrelic_agent.log.
+  log_file_name: newrelic_agent_{{app_name}}.log
+
+  # The log file directory.
+  # Default is the logs directory in the newrelic.jar parent directory.
+  #log_file_path:
+
+  # Limits the number of lines to capture for each stack trace. 
+  # Default is 30
+  max_stack_trace_lines: 30
+
+
+# Application Environments
+# ------------------------------------------
+# Environment specific settings are in this section.
+# You can use the environment to override the default settings.
+# For example, to change the app_name setting.
+# Use -Dnewrelic.environment=<environment> on the Java startup command line
+# to set the environment.
+# The default environment is production.
+
+# NOTE if your application has other named environments, you should
+# provide configuration settings for these environments here.
+
+development:
+  <<: *default_settings
+  app_name: My Application (Development)
+
+test:
+  <<: *default_settings
+  app_name: My Application (Test)
+
+production:
+  <<: *default_settings
+
+staging:
+  <<: *default_settings
+  app_name: My Application (Staging)

@@ -1,0 +1,40 @@
+---
+
+- name: create deploy key directory if it does not exist
+  file: 
+    path={{ base_dir }}/deploy_key
+    state=directory
+  
+
+- name: ensure deploy key is on remote server
+  copy: src=git_key
+        dest={{ base_dir }}/deploy_key/git_key
+        mode=0600 owner={{ deploy_user }} group={{ deploy_user }}
+
+
+- name: Removing current app directory
+  file:
+    path={{ app_dir }}
+    state=absent
+
+
+- name: clone or pull latest web app code
+  git:  repo={{ code_repository }} dest={{ app_dir }}
+        key_file={{ base_dir }}/deploy_key/git_key
+        accept_hostkey=yes
+        clone=yes
+        update=yes
+        force=yes
+        version={{ branch }}
+  register: git_output
+
+- name: Ensure that env specific config is there on the server
+  copy: src=env.cfg dest={{ app_dir }}/env.cfg
+
+  
+- name: create deploy key directory if it does not exist
+  file: 
+    path={{ app_dir }}/logs
+    state=directory
+  
+

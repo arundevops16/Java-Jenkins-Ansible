@@ -1,0 +1,17 @@
+---
+
+- name: Update the repository cache and update package "nginx" to latest version using default release squeeze-backport
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install a list of packages
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - vim
+    - curl
+    - zip
+    - unzip
+  become: true

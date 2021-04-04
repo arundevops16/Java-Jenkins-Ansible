@@ -1,0 +1,2 @@
+#!/bin/bash
+java -javaagent:"/app/{{ app_name }}/lib/newrelic/newrelic.jar" -jar -DLOG_DIR=/app/logs/{{ app_name}} -Dspring.config.location=/app/{{ app_name }}/config/application-prod.yml  /app/{{ app_name }}/lib/{{ app_name }}-*.jar

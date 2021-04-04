@@ -1,0 +1,6 @@
+#- name: restart inventorymanagement
+#  service: name={{ app_name }} state=restarted enabled=yes
+#  sudo: yes
+#- name: reload inventorymanagement
+#  service: name={{ app_name }} state=reloaded
+#  sudo: yes

@@ -1,0 +1,43 @@
+# This playbook is used for Java project
+---
+- hosts: "{{ app_name }}_{{ env }}"
+  remote_user: ubuntu
+  serial: 1
+  pre_tasks:
+    - ec2_instance_facts:
+        region: ap-south-1
+        filters:
+           network-interface.addresses.private-ip-address: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+      register: instance_data
+      delegate_to: 127.0.0.1
+
+    # - name: Deregister Target instances
+    #   elb_target:
+    #     target_group_name: "{{ target_group }}"
+    #     region: ap-south-1
+    #     target_id: "{{ instance_data.instances[0].instance_id }}"
+    #     state: absent
+    #     target_status: draining
+    #   delegate_to: 127.0.0.1
+    #   when: env == "prod"
+
+    - pause:
+        seconds: 20
+
+  roles:
+    - common-setup
+    - nginx
+    - artifacts-deployment
+    
+  # post_tasks:
+  #   - name: Register Target instances
+  #     elb_target:
+  #       target_group_name: "{{ target_group }}"
+  #       region: ap-south-1
+  #       target_id: "{{ instance_data.instances[0].instance_id }}"
+  #       state: present
+  #       target_status: healthy
+  #       target_status_timeout: 180
+  #     delegate_to: 127.0.0.1
+  #     when: env == "prod"
+

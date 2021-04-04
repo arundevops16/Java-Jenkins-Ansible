@@ -1,0 +1,16 @@
+[Unit]
+Description={{ app_name }} IAM service
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+Type=simple
+ExecStart=/app/{{ app_name }}/bin/startup.sh
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+# Globally defined variables
+
+target_group: "{{ app_name }}-{{ env }}-TG"
+base_dir: "/app"
+deploy_user: ubuntu
+code_repository: git@bitbucket.org:kundrupu/{{ app_name }}.git
+app_dir: "{{ base_dir }}/{{ app_name }}"
+branch: development
